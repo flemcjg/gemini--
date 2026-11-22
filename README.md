@@ -39,7 +39,7 @@
 {
   "statusLine": {
     "type": "command",
-    "command": "python \"%USERPROFILE%\\.gemini\\config\\plugins\\gpt-miao\\server\\agy_statusline_bridge.py\"",
+    "command": "python C:/Users/你的用户名/.gemini/config/plugins/gpt-miao/server/agy_statusline_bridge.py",
     "enabled": true,
     "stack_with_default": true
   }
