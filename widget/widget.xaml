@@ -1,0 +1,125 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="GPT-喵 · Antigravity 额度挂件" Width="350" Height="350" WindowStyle="None"
+        ResizeMode="NoResize" AllowsTransparency="True" Background="{x:Null}"
+        ShowInTaskbar="False" ShowActivated="False" Topmost="True"
+        FontFamily="Microsoft YaHei UI" UseLayoutRounding="True">
+  <Window.Resources>
+    <Style TargetType="Button">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Foreground" Value="#79659A"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Focusable" Value="False"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="ButtonBody" Background="{TemplateBinding Background}" CornerRadius="6" Padding="3,1">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="ButtonBody" Property="Background" Value="#EDE7F6"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+  <Viewbox x:Name="ScaleHost" Stretch="Uniform">
+    <Canvas x:Name="AnimationStage" Width="378" Height="378">
+      <Canvas x:Name="Root" Canvas.Left="14" Canvas.Top="14" Width="350" Height="350" RenderTransformOrigin="0.5,1">
+        <Canvas.RenderTransform>
+          <TransformGroup>
+            <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1"/>
+            <ScaleTransform x:Name="FacingScale" ScaleX="1" ScaleY="1"/>
+          </TransformGroup>
+        </Canvas.RenderTransform>
+
+        <!-- Thought Bubble -->
+        <Canvas x:Name="Bubble" Width="350" Height="239" Cursor="Hand" RenderTransformOrigin="0.4425,0.36">
+          <Canvas.RenderTransform>
+            <ScaleTransform x:Name="BubbleScale" ScaleX="1" ScaleY="1"/>
+          </Canvas.RenderTransform>
+          <Path x:Name="BubbleShape" Fill="#FFFFFF" Stroke="#745A98" StrokeThickness="4.5"
+                StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                Data="M 27,85 A 128,79 0 1 1 283,85 A 128,79 0 0 1 196,160 A 20,10 0 0 1 161,164 A 128,79 0 0 1 27,85 Z"/>
+          <Grid x:Name="SceneText" Canvas.Left="65" Canvas.Top="24" Width="178" Height="114" RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+              <ScaleTransform x:Name="TextFacingScale" ScaleX="1" ScaleY="1"/>
+            </Grid.RenderTransform>
+
+            <!-- Quote View (Default: 我是啥喵？) -->
+            <TextBlock x:Name="QuoteText" Text="我是啥喵？" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       TextAlignment="Center" TextWrapping="Wrap" FontSize="28" FontWeight="Bold"
+                       Foreground="#745A98" Visibility="Visible"/>
+
+            <!-- Quota View -->
+            <StackPanel x:Name="QuotaText" VerticalAlignment="Center" Visibility="Collapsed">
+              <Grid Height="17">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="22"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="22"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="Header" Grid.Column="1" Text="本地预算" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="12" FontWeight="SemiBold" Foreground="#7D6B91" TextTrimming="CharacterEllipsis"/>
+                <Button x:Name="Refresh" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Width="20" Height="16" Content="↻" FontSize="12" ToolTip="立即刷新本地统计"/>
+              </Grid>
+              <StackPanel x:Name="ShortRow" Margin="0,2,0,0" IsHitTestVisible="False">
+                <Grid Height="24">
+                  <TextBlock x:Name="ShortLabel" Text="5 小时" FontSize="12" VerticalAlignment="Center" Foreground="#76638D"/>
+                  <TextBlock x:Name="ShortLeft" Text="100%" HorizontalAlignment="Right" VerticalAlignment="Center"
+                             FontFamily="Segoe UI" FontSize="22" FontWeight="Bold" Foreground="#745A98"/>
+                </Grid>
+                <Border Height="5" Background="#EAE4F3" CornerRadius="2.5" Margin="0,1,0,0">
+                  <Border x:Name="ShortBar" Background="#9B7FD1" CornerRadius="2.5" Width="178" HorizontalAlignment="Left"/>
+                </Border>
+                <TextBlock x:Name="ShortReset" Text="当前 5 小时窗口满额" Margin="0,2,0,0" FontSize="10.5"
+                           Foreground="#7D6B91" TextTrimming="CharacterEllipsis"/>
+              </StackPanel>
+              <StackPanel x:Name="WeekRow" Margin="0,4,0,0" IsHitTestVisible="False">
+                <Grid Height="24">
+                  <TextBlock x:Name="WeekLabel" Text="每周" FontSize="12" VerticalAlignment="Center" Foreground="#76638D"/>
+                  <TextBlock x:Name="WeekLeft" Text="100%" HorizontalAlignment="Right" VerticalAlignment="Center"
+                             FontFamily="Segoe UI" FontSize="22" FontWeight="Bold" Foreground="#745A98"/>
+                </Grid>
+                <Border Height="5" Background="#EAE4F3" CornerRadius="2.5" Margin="0,1,0,0">
+                  <Border x:Name="WeekBar" Background="#AA95CD" CornerRadius="2.5" Width="178" HorizontalAlignment="Left"/>
+                </Border>
+                <TextBlock x:Name="WeekReset" Text="近 7 天 0 个会话" Margin="0,2,0,0" FontSize="10.5"
+                           Foreground="#7D6B91" TextTrimming="CharacterEllipsis"/>
+              </StackPanel>
+            </StackPanel>
+          </Grid>
+        </Canvas>
+
+        <!-- Trailing Thought Dots -->
+        <Ellipse x:Name="TailFar" Canvas.Left="190" Canvas.Top="170" Width="21" Height="14"
+                 Fill="#FFFFFF" Stroke="#745A98" StrokeThickness="4" RenderTransformOrigin="0.5,0.5">
+          <Ellipse.RenderTransform>
+            <ScaleTransform x:Name="TailFarScale" ScaleX="1" ScaleY="1"/>
+          </Ellipse.RenderTransform>
+        </Ellipse>
+        <Ellipse x:Name="TailNear" Canvas.Left="212" Canvas.Top="190" Width="13" Height="9"
+                 Fill="#745A98" Stroke="#745A98" StrokeThickness="1" RenderTransformOrigin="0.5,0.5">
+          <Ellipse.RenderTransform>
+            <ScaleTransform x:Name="TailNearScale" ScaleX="1" ScaleY="1"/>
+          </Ellipse.RenderTransform>
+        </Ellipse>
+
+        <!-- Purple Catgirl Sprite -->
+        <Image x:Name="Girl" Canvas.Left="146" Canvas.Top="152" Width="200" Height="194"
+               Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" Cursor="Hand"
+               RenderTransformOrigin="0.5,1"
+               ToolTip="点猫娘看剩余额度；点气泡切语录/收起；拖动调整位置；右键设置">
+          <Image.RenderTransform>
+            <ScaleTransform x:Name="GirlDanceScale" ScaleX="1" ScaleY="1"/>
+          </Image.RenderTransform>
+        </Image>
+      </Canvas>
+    </Canvas>
+  </Viewbox>
+</Window>

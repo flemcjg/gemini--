@@ -1,0 +1,12 @@
+{
+  "name": "gpt-miao",
+  "displayName": "GPT-喵",
+  "version": "1.0.0",
+  "description": "Antigravity 紫发猫娘额度挂件插件：支持原生侧边栏 MCP App 面板与 Windows 透明桌面悬浮挂件双形态，展示「我是啥喵？」思考气泡、本地对话用量统计与自定义预算、猫娘语录、按压回弹音效、窗口跟随与拖动翻转。",
+  "logo": "assets/logo.png",
+  "suggestedPrompts": [
+    "打开 GPT-喵 面板查看我的本地对话用量和额度预算",
+    "帮我启动 Windows 桌面上的 GPT-喵 透明悬浮挂件",
+    "给 GPT-喵 添加几句新的猫娘自定义语录"
+  ]
+}

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPT-喵 · Antigravity 额度挂件</title>
+  <style>
+    :root {
+      --bg: var(--color-background-primary, #ffffff);
+      --bg2: var(--color-background-secondary, #f7f4fc);
+      --fg: var(--color-text-primary, #241b35);
+      --fg2: var(--color-text-secondary, #6e5f85);
+      --border: var(--color-border-primary, #e4dcf0);
+      --brand: #745A98;
+      --brand-light: #EDE7F6;
+      --bar-bg: #EAE4F3;
+      --bar-fill: #9B7FD1;
+      --font: var(--font-sans, "Microsoft YaHei UI", system-ui, -apple-system, sans-serif);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 12px;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .wrap {
+      max-width: 460px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .btn:hover { border-color: var(--brand); background: var(--brand-light); color: #3d2c59; }
+    .btn-primary {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .btn-primary:hover { background: #634987; color: #ffffff; }
+    .btn-danger {
+      background: #fff1f2;
+      border-color: #fecdd3;
+      color: #be123c;
+    }
+    .btn-danger:hover { background: #ffe4e6; color: #9f1239; border-color: #fda4af; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--fg2);
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #9ca3af; }
+    .dot.on { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.6); }
+
+    /* Interactive Stage */
+    .stage {
+      position: relative;
+      height: 292px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      background-image: radial-gradient(rgba(116,90,152,0.16) 1px, transparent 1px);
+      background-size: 16px 16px;
+      overflow: hidden;
+      user-select: none;
+    }
+    .widget-root {
+      position: absolute;
+      width: 300px;
+      height: 278px;
+      right: 10px;
+      bottom: 4px;
+      transform-origin: center bottom;
+    }
+    .widget-press {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-origin: 50% 92%;
+      transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .widget-press.pressed {
+      transform: scale(0.95, 0.90) translateY(5px);
+      transition: transform 0.06s ease-out;
+    }
+    .flip-layer { position: relative; width: 100%; height: 100%; }
+    .flipped .flip-layer { transform: scaleX(-1); }
+    .flipped .keep-upright { transform: scaleX(-1); }
+
+    @keyframes beatBounce {
+      0%, 100% { transform: scale(1, 1) translateY(0); }
+      25% { transform: scale(1.045, 0.945) translateY(4px); }
+      55% { transform: scale(0.975, 1.035) translateY(-4px); }
+    }
+    .music-active .girl-wrap { animation: beatBounce 0.48s ease-in-out infinite; }
+
+    .bubble-wrap { position: absolute; left: 0; top: 0; width: 230px; height: 174px; cursor: pointer; }
+    .bubble-main {
+      position: relative;
+      width: 214px;
+      height: 136px;
+      transform-origin: 58% 85%;
+      transition: transform 0.22s cubic-bezier(0.34, 1.45, 0.64, 1), opacity 0.16s ease;
+    }
+    .tail-far {
+      position: absolute; left: 150px; top: 138px;
+      transition: transform 0.16s ease 0.04s, opacity 0.14s ease 0.04s;
+    }
+    .tail-near {
+      position: absolute; left: 169px; top: 154px;
+      transition: transform 0.14s ease 0.08s, opacity 0.12s ease 0.08s;
+    }
+    .bubble-hidden .bubble-main,
+    .bubble-hidden .tail-far,
+    .bubble-hidden .tail-near { transform: scale(0.2); opacity: 0; pointer-events: none; }
+
+    .bubble-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 24px;
+    }
+    .quote-text {
+      font-weight: 800;
+      color: #745A98;
+      text-align: center;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .quota-box {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .quota-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: #7D6B91;
+    }
+    .quota-line {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .quota-lbl { font-size: 11px; color: #76638D; }
+    .quota-pct { font-size: 18px; font-weight: 800; color: #745A98; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .bar-track { height: 5px; border-radius: 99px; background: var(--bar-bg); overflow: hidden; margin-top: 2px; }
+    .bar-fill { height: 100%; border-radius: 99px; background: var(--bar-fill); transition: width 0.3s ease; }
+    .quota-sub { font-size: 10px; color: #7D6B91; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hidden { display: none !important; }
+
+    .girl-wrap {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 158px;
+      height: 146px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+    }
+    .girl-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 3px 6px rgba(116,90,152,0.22));
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .field label { display: block; font-size: 11px; color: var(--fg2); margin-bottom: 3px; }
+    .field input, .field select {
+      width: 100%;
+      padding: 5px 8px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 12px;
+      font-family: inherit;
+    }
+    .toast { font-size: 11px; color: var(--fg2); min-height: 16px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Header & Desktop Widget Launcher -->
+    <div class="card row">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <strong style="font-size:14px;color:var(--brand);">GPT-喵</strong>
+        <span class="badge"><span id="widget-dot" class="dot"></span><span id="widget-status">悬浮挂件未启动</span></span>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button id="btn-start-widget" class="btn btn-primary">启动桌面悬浮窗</button>
+        <button id="btn-stop-widget" class="btn btn-danger hidden">关闭悬浮窗</button>
+      </div>
+    </div>
+
+    <!-- Interactive Catgirl Stage -->
+    <div class="stage" id="stage">
+      <div class="widget-root" id="widget">
+        <div class="widget-press" id="widget-press">
+          <div class="flip-layer">
+            <div class="bubble-wrap" id="bubble-wrap">
+              <div class="bubble-main">
+                <svg viewBox="0 0 256 164" style="width:100%;height:100%;overflow:visible;">
+                  <path d="M 128,6 C 196,6 250,38 250,79 C 250,120 196,152 128,152 C 60,152 6,120 6,79 C 6,38 60,6 128,6 Z"
+                        fill="#FFFFFF" stroke="#745A98" stroke-width="5" stroke-linejoin="round" />
+                </svg>
+                <div class="bubble-inner keep-upright">
+                  <div id="view-quote" class="quote-text" style="font-size:24px;">我是啥喵？</div>
+                  <div id="view-quota" class="quota-box hidden">
+                    <div class="quota-hdr">
+                      <span style="width:16px;"></span>
+                      <span id="quota-hdr-text">本地预算</span>
+                      <button id="btn-refresh" style="border:none;background:transparent;color:#745A98;cursor:pointer;font-size:12px;padding:0 2px;" title="刷新统计">↻</button>
+                    </div>
+                    <div>
+                      <div class="quota-line">
+                        <span id="s-lbl" class="quota-lbl">5 小时</span>
+                        <span id="s-pct" class="quota-pct">100%</span>
+                      </div>
+                      <div class="bar-track"><div id="s-bar" class="bar-fill" style="width:100%;"></div></div>
+                      <div id="s-sub" class="quota-sub">当前 5 小时窗口满额</div>
+                    </div>
+                    <div id="w-row">
+                      <div class="quota-line">
+                        <span id="w-lbl" class="quota-lbl">每周</span>
+                        <span id="w-pct" class="quota-pct">100%</span>
+                      </div>
+                      <div class="bar-track"><div id="w-bar" class="bar-fill" style="width:100%;background:#AA95CD;"></div></div>
+                      <div id="w-sub" class="quota-sub">近 7 天 0 个会话</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tail-far">
+                <svg width="20" height="14" viewBox="0 0 20 14"><ellipse cx="10" cy="7" rx="7.5" ry="4.8" fill="#FFFFFF" stroke="#745A98" stroke-width="3.2"/></svg>
+              </div>
+              <div class="tail-near">
+                <svg width="14" height="10" viewBox="0 0 14 10"><ellipse cx="7" cy="5" rx="4.6" ry="3.2" fill="#745A98"/></svg>
+              </div>
+            </div>
+            <div class="girl-wrap" id="girl-wrap" title="点猫娘看本地预算 · 点气泡切语录/收起">
+              <img src="__CATGIRL_DATA_URI__" alt="紫发猫娘" draggable="false" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Action Buttons -->
+    <div class="row">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">
+        <button id="q-miao" class="btn">我是啥喵？</button>
+        <button id="q-quota" class="btn">剩余额度</button>
+        <button id="q-next" class="btn">换句语录</button>
+        <button id="q-flip" class="btn">左右翻转</button>
+        <button id="q-music" class="btn">♪ 律动</button>
+      </div>
+      <span id="toast" class="toast">点击猫娘或气泡试试喵～</span>
+    </div>
+
+    <!-- Calibration & Config -->
+    <div class="card">
+      <div class="row">
+        <strong style="font-size:12px;">一键校准 Antigravity 真实额度（锚点估算）</strong>
+        <button id="btn-calibrate" class="btn btn-primary" style="padding:3px 9px;">校准并同步</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>当前 5 小时剩余（%）</label>
+          <input id="cal-short" type="number" min="0" max="100" value="94" />
+        </div>
+        <div class="field">
+          <label>当前每周剩余（%）</label>
+          <input id="cal-week" type="number" min="0" max="100" value="97" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <strong style="font-size:12px;">自定义预算、碰撞限制与语录</strong>
+        <button id="btn-save-cfg" class="btn btn-primary" style="padding:3px 9px;">保存并同步悬浮窗</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>5 小时估算基数（轮）</label>
+          <input id="inp-short" type="number" min="10" max="10000" value="160" />
+        </div>
+        <div class="field">
+          <label>每周估算基数（轮）</label>
+          <input id="inp-week" type="number" min="20" max="100000" value="650" />
+        </div>
+        <div class="field">
+          <label>悬浮窗显示模式</label>
+          <select id="inp-mode">
+            <option value="follow">跟随 Antigravity 窗口</option>
+            <option value="desktop">桌面自由拖动</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>悬浮窗缩放：<span id="scale-readout" style="font-weight:700;color:var(--brand);">100%</span></label>
+          <input id="inp-scale" type="range" min="60" max="250" step="5" value="100" style="padding:0;accent-color:#745A98;" />
+          <div style="display:flex;gap:4px;margin-top:4px;">
+            <button type="button" class="btn scale-pre" data-v="80" style="flex:1;padding:2px 0;font-size:11px;">80%</button>
+            <button type="button" class="btn scale-pre" data-v="100" style="flex:1;padding:2px 0;font-size:11px;">100%</button>
+            <button type="button" class="btn scale-pre" data-v="140" style="flex:1;padding:2px 0;font-size:11px;">140%</button>
+            <button type="button" class="btn scale-pre" data-v="180" style="flex:1;padding:2px 0;font-size:11px;">180%</button>
+          </div>
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--fg2);cursor:pointer;">
+        <input id="inp-clamp" type="checkbox" checked />
+        <span>开启桌面边界碰撞限制（不让挂件离开屏幕）</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--fg2);cursor:pointer;">
+        <input id="inp-music" type="checkbox" />
+        <span>开启音乐律动（自动检测电脑播放音频随节拍律动）</span>
+      </label>
+      <div class="form-grid" style="margin-top:8px;">
+        <div class="field">
+          <label>自动语录（可选）</label>
+          <select id="inp-autoquote">
+            <option value="0">关闭自动语录</option>
+            <option value="5">每 5 分钟</option>
+            <option value="10">每 10 分钟</option>
+            <option value="30">每 30 分钟（半小时）</option>
+          </select>
+        </div>
+        <div class="field" style="display:flex;align-items:flex-end;">
+          <label style="display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:12px;color:var(--fg2);cursor:pointer;">
+            <input id="inp-reply-notify" type="checkbox" checked />
+            <span>开启回答结束提醒</span>
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <input id="inp-quote" type="text" placeholder="新增一句自定义猫娘语录..." style="flex:1;padding:5px 8px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:12px;" />
+        <button id="btn-add-quote" class="btn">添加语录</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Minimal Spec-Compliant MCP App JSON-RPC 2.0 Bridge (SEP-1865) ----
+    let rpcId = 1;
+    const pending = new Map();
+
+    function sendRpc(method, params) {
+      const id = rpcId++;
+      return new Promise((resolve, reject) => {
+        pending.set(id, { resolve, reject });
+        window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+      });
+    }
+
+    function sendNotification(method, params) {
+      window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
+    }
+
+    function applyTheme(ctx) {
+      if (!ctx) return;
+      if (ctx.styles && ctx.styles.variables) {
+        const root = document.documentElement;
+        for (const [k, v] of Object.entries(ctx.styles.variables)) {
+          root.style.setProperty(k, v);
+        }
+      }
+    }
+
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== "object" || msg.jsonrpc !== "2.0") return;
+
+      // Host ping
+      if (msg.method === "ping" && msg.id !== undefined) {
+        window.parent.postMessage({ jsonrpc: "2.0", id: msg.id, result: {} }, "*");
+        return;
+      }
+      // Responses to our requests
+      if (msg.id !== undefined && pending.has(msg.id)) {
+        const { resolve, reject } = pending.get(msg.id);
+        pending.delete(msg.id);
+        if (msg.error) reject(msg.error);
+        else resolve(msg.result);
+        return;
+      }
+      // Host notifications
+      if (msg.method === "ui/notifications/tool-result" && msg.params) {
+        const sc = msg.params.structuredContent || (msg.params.result && msg.params.result.structuredContent);
+        if (sc) applyState(sc);
+      } else if (msg.method === "ui/notifications/host-context-changed" && msg.params) {
+        applyTheme(msg.params);
+      }
+    });
+
+    async function callAppAction(action, payload = {}) {
+      try {
+        const res = await sendRpc("tools/call", {
+          name: "gpt_miao_app_action",
+          arguments: { action, payload }
+        });
+        if (res && res.structuredContent) {
+          applyState(res.structuredContent);
+        }
+      } catch (e) {
+        setToast("同步失败：" + (e.message || e));
+      }
+    }
+
+    // ---- UI State & Rendering ----
+    let state = {
+      quotes: [{ text: "我是啥喵？", weight: 3.0 }],
+      usage: null,
+      config: null,
+      widgetRunning: false
+    };
+    let bubbleMode = "quote"; // quote | quota | hidden
+    let quoteIdx = 0;
+    let musicOn = false;
+    let flipped = false;
+
+    const el = (id) => document.getElementById(id);
+
+    function setToast(txt) {
+      el("toast").textContent = txt || "";
+    }
+
+    function renderQuote(idx) {
+      const list = state.quotes && state.quotes.length ? state.quotes : [{ text: "我是啥喵？" }];
+      quoteIdx = idx % list.length;
+      const text = list[quoteIdx].text || "我是啥喵？";
+      const qt = el("view-quote");
+      qt.textContent = text;
+      qt.style.fontSize = text.length <= 6 ? "26px" : text.length <= 12 ? "20px" : text.length <= 20 ? "17px" : "15px";
+    }
+
+    function setBubbleMode(mode) {
+      bubbleMode = mode;
+      const bw = el("bubble-wrap");
+      if (mode === "hidden") {
+        bw.classList.add("bubble-hidden");
+      } else {
+        bw.classList.remove("bubble-hidden");
+        el("view-quote").classList.toggle("hidden", mode !== "quote");
+        el("view-quota").classList.toggle("hidden", mode !== "quota");
+      }
+    }
+
+    function applyState(sc) {
+      state = Object.assign(state, sc);
+      if (sc.usage) {
+        const u = sc.usage;
+        el("quota-hdr-text").textContent = u.planName || "本地预算";
+        el("s-lbl").textContent = u.short.label;
+        el("s-pct").textContent = u.short.leftPct + "%";
+        el("s-bar").style.width = u.short.leftPct + "%";
+        el("s-sub").textContent = `${u.short.resetText} (${u.short.used}/${u.short.budget})`;
+
+        el("w-row").classList.toggle("hidden", !u.week.visible);
+        el("w-lbl").textContent = u.week.label;
+        el("w-pct").textContent = u.week.leftPct + "%";
+        el("w-bar").style.width = u.week.leftPct + "%";
+        el("w-sub").textContent = u.week.resetText;
+      }
+      if (sc.config) {
+        el("inp-short").value = sc.config.shortBudget ?? 160;
+        el("inp-week").value = sc.config.weekBudget ?? 650;
+        el("inp-mode").value = sc.config.displayMode || "follow";
+        el("inp-scale").value = sc.config.scale ?? 100;
+        el("scale-readout").textContent = (sc.config.scale ?? 100) + "%";
+        el("inp-clamp").checked = sc.config.keepInsideScreen !== false;
+        el("inp-music").checked = !!sc.config.musicRhythm;
+        el("inp-autoquote").value = sc.config.autoQuoteEnabled ? String(sc.config.autoQuoteMinutes || 5) : "0";
+        el("inp-reply-notify").checked = sc.config.replyNotifyEnabled !== false;
+        if (sc.usage) {
+          el("cal-short").value = sc.usage.short.leftPct;
+          el("cal-week").value = sc.usage.week.leftPct;
+        }
+      }
+      const running = !!sc.widgetRunning;
+      el("widget-dot").classList.toggle("on", running);
+      el("widget-status").textContent = running ? "悬浮挂件运行中" : "悬浮挂件未启动";
+      el("btn-start-widget").classList.toggle("hidden", running);
+      el("btn-stop-widget").classList.toggle("hidden", !running);
+      if (sc.initialView === "quota") setBubbleMode("quota");
+      if (sc.actionMessage) setToast(sc.actionMessage);
+    }
+
+    // Soft Web Audio pop
+    let actx = null;
+    function pop(up) {
+      try {
+        if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+        if (actx.state === "suspended") actx.resume();
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = "sine";
+        const t = actx.currentTime;
+        o.frequency.setValueAtTime(up ? 420 : 520, t);
+        o.frequency.exponentialRampToValueAtTime(up ? 660 : 340, t + 0.06);
+        g.gain.setValueAtTime(0.08, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+        o.connect(g); g.connect(actx.destination);
+        o.start(t); o.stop(t + 0.075);
+      } catch (e) {}
+    }
+
+    // Interactions
+    el("girl-wrap").addEventListener("pointerdown", () => {
+      el("widget-press").classList.add("pressed");
+      pop(false);
+    });
+    el("girl-wrap").addEventListener("pointerup", () => {
+      el("widget-press").classList.remove("pressed");
+      pop(true);
+      setBubbleMode("quota");
+      callAppAction("refresh");
+    });
+    el("bubble-wrap").addEventListener("click", (e) => {
+      if (e.target.id === "btn-refresh") return;
+      pop(true);
+      if (bubbleMode === "quota") {
+        const list = state.quotes || [];
+        renderQuote(Math.floor(Math.random() * Math.max(1, list.length)));
+        setBubbleMode("quote");
+      } else if (bubbleMode === "quote") {
+        setBubbleMode("hidden");
+      }
+    });
+    el("btn-refresh").addEventListener("click", (e) => {
+      e.stopPropagation();
+      pop(true);
+      callAppAction("refresh");
+    });
+
+    el("q-miao").addEventListener("click", () => { renderQuote(0); setBubbleMode("quote"); pop(true); });
+    el("q-quota").addEventListener("click", () => { setBubbleMode("quota"); callAppAction("refresh"); pop(true); });
+    el("q-next").addEventListener("click", () => { renderQuote(quoteIdx + 1); setBubbleMode("quote"); pop(true); });
+    el("q-flip").addEventListener("click", () => {
+      flipped = !flipped;
+      el("widget").classList.toggle("flipped", flipped);
+      el("widget").style.right = flipped ? "auto" : "10px";
+      el("widget").style.left = flipped ? "10px" : "auto";
+    });
+    el("q-music").addEventListener("click", (e) => {
+      musicOn = !musicOn;
+      el("widget").classList.toggle("music-active", musicOn);
+      e.currentTarget.classList.toggle("btn-primary", musicOn);
+      el("inp-music").checked = musicOn;
+      callAppAction("save_config", { musicRhythm: musicOn });
+    });
+    el("inp-music").addEventListener("change", () => {
+      musicOn = el("inp-music").checked;
+      el("widget").classList.toggle("music-active", musicOn);
+      el("q-music").classList.toggle("btn-primary", musicOn);
+      callAppAction("save_config", { musicRhythm: musicOn });
+    });
+
+    el("btn-start-widget").addEventListener("click", () => callAppAction("start_widget"));
+    el("btn-stop-widget").addEventListener("click", () => callAppAction("stop_widget"));
+    el("btn-calibrate").addEventListener("click", () => {
+      callAppAction("calibrate", {
+        shortPct: Number(el("cal-short").value),
+        weekPct: Number(el("cal-week").value)
+      });
+    });
+    function applyPreviewScale(pct) {
+      const clamped = Math.max(60, Math.min(250, Number(pct) || 100));
+      el("inp-scale").value = clamped;
+      el("scale-readout").textContent = clamped + "%";
+      // Visual preview scale inside the side-pane stage (clamped to fit stage nicely)
+      const previewRatio = Math.max(0.55, Math.min(1.15, clamped / 100));
+      el("widget").style.transform = `scale(${previewRatio})`;
+    }
+
+    let scaleDebounce = null;
+    el("inp-scale").addEventListener("input", () => {
+      const v = Number(el("inp-scale").value) || 100;
+      applyPreviewScale(v);
+      clearTimeout(scaleDebounce);
+      scaleDebounce = setTimeout(() => {
+        callAppAction("save_config", { scale: v });
+      }, 150);
+    });
+    el("inp-scale").addEventListener("change", () => {
+      clearTimeout(scaleDebounce);
+      const v = Number(el("inp-scale").value) || 100;
+      applyPreviewScale(v);
+      callAppAction("save_config", { scale: v });
+    });
+    document.querySelectorAll(".scale-pre").forEach((b) => {
+      b.addEventListener("click", () => {
+        const v = Number(b.dataset.v);
+        applyPreviewScale(v);
+        callAppAction("save_config", { scale: v });
+      });
+    });
+
+    el("inp-autoquote").addEventListener("change", () => {
+      const mins = Number(el("inp-autoquote").value) || 0;
+      callAppAction("save_config", {
+        autoQuoteEnabled: mins > 0,
+        autoQuoteMinutes: mins > 0 ? mins : 5
+      });
+    });
+    el("inp-reply-notify").addEventListener("change", () => {
+      callAppAction("save_config", { replyNotifyEnabled: el("inp-reply-notify").checked });
+    });
+
+    el("btn-save-cfg").addEventListener("click", () => {
+      const aq = Number(el("inp-autoquote").value) || 0;
+      callAppAction("save_config", {
+        shortBudget: Number(el("inp-short").value) || 160,
+        weekBudget: Number(el("inp-week").value) || 650,
+        displayMode: el("inp-mode").value,
+        scale: Number(el("inp-scale").value) || 100,
+        keepInsideScreen: el("inp-clamp").checked,
+        autoQuoteEnabled: aq > 0,
+        autoQuoteMinutes: aq > 0 ? aq : 5,
+        replyNotifyEnabled: el("inp-reply-notify").checked
+      });
+    });
+
+    // Auto-refresh quota in side pane every 10s without manual click
+    setInterval(() => {
+      callAppAction("refresh");
+    }, 10000);
+    el("btn-add-quote").addEventListener("click", () => {
+      const val = el("inp-quote").value.trim();
+      if (!val) return;
+      el("inp-quote").value = "";
+      callAppAction("add_quote", { text: val, weight: 1.5 });
+      setTimeout(() => {
+        renderQuote(Math.max(0, (state.quotes || []).length - 1));
+        setBubbleMode("quote");
+      }, 200);
+    });
+
+    // Boot MCP App handshake
+    (async () => {
+      try {
+        const res = await sendRpc("ui/initialize", {
+          protocolVersion: "2026-01-26",
+          appInfo: { name: "gpt-miao", version: "1.0.0" },
+          appCapabilities: {}
+        });
+        if (res && res.hostContext) applyTheme(res.hostContext);
+        sendNotification("ui/notifications/initialized", {});
+        sendNotification("ui/notifications/size-changed", {
+          width: document.documentElement.scrollWidth,
+          height: document.documentElement.scrollHeight
+        });
+      } catch (e) {
+        // Standalone preview fallback
+      }
+    })();
+  </script>
+</body>
+</html>
