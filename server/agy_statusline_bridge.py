@@ -73,8 +73,18 @@ def main():
                 "resetInSeconds": int(reset_sec) if isinstance(reset_sec, (int, float)) else None,
             })
 
-    # Sort shortest window first (e.g., 5 小时 before 每周)
-    windows.sort(key=lambda w: w["resetInSeconds"] if w["resetInSeconds"] is not None else 10**9)
+    # Prioritize Gemini primary windows (gemini-5h, gemini-weekly) first, then other groups
+    def sort_key(w):
+        k = w["key"].lower()
+        if k == "gemini-5h":
+            return (0, 0)
+        if k == "gemini-weekly":
+            return (0, 1)
+        if k.startswith("gemini"):
+            return (1, w["resetInSeconds"] if w["resetInSeconds"] is not None else 10**9)
+        return (2, w["resetInSeconds"] if w["resetInSeconds"] is not None else 10**9)
+
+    windows.sort(key=sort_key)
 
     if windows:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
